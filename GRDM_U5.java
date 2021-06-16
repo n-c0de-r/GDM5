@@ -32,7 +32,7 @@ public class GRDM_U5 implements PlugIn {
 	private int width;
 	private int height;
 
-	String[] items = {"Original", "Filter 1"};
+	String[] items = {"Original", "Weichzeichnung", "Hochpassfilter", "Verstärkte Kanten"};
 
 
 	public static void main(String args[]) {
@@ -128,7 +128,7 @@ public class GRDM_U5 implements PlugIn {
 				}
 			}
 			
-			if (method.equals("Filter 1")) {
+			if (method.equals("Weichzeichnung")) {
 
 				for (int y=0; y<height; y++) {
 					for (int x=0; x<width; x++) {
@@ -148,7 +148,45 @@ public class GRDM_U5 implements PlugIn {
 				}
 			}
 			
+			if (method.equals("Hochpassfilter")) {
+
+				for (int y=0; y<height; y++) {
+					for (int x=0; x<width; x++) {
+						int pos = y*width + x;
+						int argb = origPixels[pos];  // Lesen der Originalwerte 
+
+						int r = (argb >> 16) & 0xff;
+						int g = (argb >>  8) & 0xff;
+						int b =  argb        & 0xff;
+
+						int rn = r/2;
+						int gn = g/2;
+						int bn = b/2;
+
+						pixels[pos] = (0xFF<<24) | (rn<<16) | (gn << 8) | bn;
+					}
+				}
+			}
 			
+			if (method.equals("Verstärkte Kanten")) {
+
+				for (int y=0; y<height; y++) {
+					for (int x=0; x<width; x++) {
+						int pos = y*width + x;
+						int argb = origPixels[pos];  // Lesen der Originalwerte 
+
+						int r = (argb >> 16) & 0xff;
+						int g = (argb >>  8) & 0xff;
+						int b =  argb        & 0xff;
+
+						int rn = r/2;
+						int gn = g/2;
+						int bn = b/2;
+
+						pixels[pos] = (0xFF<<24) | (rn<<16) | (gn << 8) | bn;
+					}
+				}
+			}
 			
 		}
 
