@@ -23,32 +23,31 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 /**
-     Opens an image window and adds a panel below the image
+ * Opens an image window and adds a panel below the image
  */
-public class GRDM_U5 implements PlugIn {
+public class GRDM_U5_s0577683 implements PlugIn {
 
 	ImagePlus imp; // ImagePlus object
 	private int[] origPixels;
 	private int width;
 	private int height;
 
-	String[] items = {"Original", "Weichzeichnung", "Hochpassfilter", "Verstärkte Kanten"};
-
+	String[] items = { "Original", "Weichzeichnung", "Hochpassfilter", "Verstärkte Kanten" };
 
 	public static void main(String args[]) {
 
-		IJ.open("/users/barthel/applications/ImageJ/_images/bear.jpg");
-		//IJ.open("Z:/Pictures/Beispielbilder/orchid.jpg");
+		IJ.open("sail.jpg");
+		// IJ.open("Z:/Pictures/Beispielbilder/orchid.jpg");
 
-		GRDM_U5 pw = new GRDM_U5();
+		GRDM_U5_s0577683 pw = new GRDM_U5_s0577683();
 		pw.imp = IJ.getImage();
 		pw.run("");
 	}
 
 	public void run(String arg) {
-		if (imp==null) 
+		if (imp == null)
 			imp = WindowManager.getCurrentImage();
-		if (imp==null) {
+		if (imp == null) {
 			return;
 		}
 		CustomCanvas cc = new CustomCanvas(imp);
@@ -58,14 +57,12 @@ public class GRDM_U5 implements PlugIn {
 		new CustomWindow(imp, cc);
 	}
 
-
 	private void storePixelValues(ImageProcessor ip) {
 		width = ip.getWidth();
 		height = ip.getHeight();
 
-		origPixels = ((int []) ip.getPixels()).clone();
+		origPixels = ((int[]) ip.getPixels()).clone();
 	}
-
 
 	class CustomCanvas extends ImageCanvas {
 
@@ -75,18 +72,17 @@ public class GRDM_U5 implements PlugIn {
 
 	} // CustomCanvas inner class
 
-
 	class CustomWindow extends ImageWindow implements ItemListener {
 
 		private String method;
-		
+
 		CustomWindow(ImagePlus imp, ImageCanvas ic) {
 			super(imp, ic);
 			addPanel();
 		}
 
 		void addPanel() {
-			//JPanel panel = new JPanel();
+			// JPanel panel = new JPanel();
 			Panel panel = new Panel();
 
 			JComboBox cb = new JComboBox(items);
@@ -107,89 +103,102 @@ public class GRDM_U5 implements PlugIn {
 				method = item.toString();
 				changePixelValues(imp.getProcessor());
 				imp.updateAndDraw();
-			} 
+			}
 
 		}
-
 
 		private void changePixelValues(ImageProcessor ip) {
 
 			// Array zum Zurückschreiben der Pixelwerte
-			int[] pixels = (int[])ip.getPixels();
+			int[] pixels = (int[]) ip.getPixels();
 
 			if (method.equals("Original")) {
 
-				for (int y=0; y<height; y++) {
-					for (int x=0; x<width; x++) {
-						int pos = y*width + x;
-						
+				for (int y = 0; y < height; y++) {
+					for (int x = 0; x < width; x++) {
+						int pos = y * width + x;
+
 						pixels[pos] = origPixels[pos];
 					}
 				}
 			}
-			
+
 			if (method.equals("Weichzeichnung")) {
 
-				for (int y=0; y<height; y++) {
-					for (int x=0; x<width; x++) {
-						int pos = y*width + x;
-						int argb = origPixels[pos];  // Lesen der Originalwerte 
+				for (int y = 0; y < height; y++) {
+					for (int x = 0; x < width; x++) {
+						int pos = y * width + x;
+						int argb = origPixels[pos]; // Lesen der Originalwerte
 
 						int r = (argb >> 16) & 0xff;
-						int g = (argb >>  8) & 0xff;
-						int b =  argb        & 0xff;
+						int g = (argb >> 8) & 0xff;
+						int b = argb & 0xff;
 
-						int rn = r/2;
-						int gn = g/2;
-						int bn = b/2;
+						int rn = 0;
+						int gn = 0;
+						int bn = 0;
 
-						pixels[pos] = (0xFF<<24) | (rn<<16) | (gn << 8) | bn;
+						for (int i=-1; i<2; i++) {
+							for (int j=-1; j<2; j++) {
+								if (i+y<0 || i+y>height) i=0;
+								if (j+x<0 || j+x>width) j=0;
+								int colors = origPixels[pos+i*width+j];
+								int rt = (colors >> 16) & 0xff;
+								int gt = (colors >> 8) & 0xff;
+								int bt = colors & 0xff;
+								rn += rt /9.0;
+								gn += gt /9.0;
+								bn += bt /9.0;
+							}
+						}
+						
+
+						pixels[pos] = (0xFF << 24) | (rn << 16) | (gn << 8) | bn;
 					}
 				}
 			}
-			
+
 			if (method.equals("Hochpassfilter")) {
 
-				for (int y=0; y<height; y++) {
-					for (int x=0; x<width; x++) {
-						int pos = y*width + x;
-						int argb = origPixels[pos];  // Lesen der Originalwerte 
+				for (int y = 0; y < height; y++) {
+					for (int x = 0; x < width; x++) {
+						int pos = y * width + x;
+						int argb = origPixels[pos]; // Lesen der Originalwerte
 
 						int r = (argb >> 16) & 0xff;
-						int g = (argb >>  8) & 0xff;
-						int b =  argb        & 0xff;
+						int g = (argb >> 8) & 0xff;
+						int b = argb & 0xff;
 
-						int rn = r/2;
-						int gn = g/2;
-						int bn = b/2;
+						int rn = r / 2;
+						int gn = g / 2;
+						int bn = b / 2;
 
-						pixels[pos] = (0xFF<<24) | (rn<<16) | (gn << 8) | bn;
+						pixels[pos] = (0xFF << 24) | (rn << 16) | (gn << 8) | bn;
 					}
 				}
 			}
-			
+
 			if (method.equals("Verstärkte Kanten")) {
 
-				for (int y=0; y<height; y++) {
-					for (int x=0; x<width; x++) {
-						int pos = y*width + x;
-						int argb = origPixels[pos];  // Lesen der Originalwerte 
+				for (int y = 0; y < height; y++) {
+					for (int x = 0; x < width; x++) {
+						int pos = y * width + x;
+						int argb = origPixels[pos]; // Lesen der Originalwerte
 
 						int r = (argb >> 16) & 0xff;
-						int g = (argb >>  8) & 0xff;
-						int b =  argb        & 0xff;
+						int g = (argb >> 8) & 0xff;
+						int b = argb & 0xff;
 
-						int rn = r/2;
-						int gn = g/2;
-						int bn = b/2;
+						int rn = r / 2;
+						int gn = g / 2;
+						int bn = b / 2;
 
-						pixels[pos] = (0xFF<<24) | (rn<<16) | (gn << 8) | bn;
+						pixels[pos] = (0xFF << 24) | (rn << 16) | (gn << 8) | bn;
 					}
 				}
 			}
-			
+
 		}
 
-
 	} // CustomWindow inner class
-} 
+}
