@@ -128,32 +128,32 @@ public class GRDM_U5_s0577683 implements PlugIn {
 				for (int y = 0; y < height; y++) {
 					for (int x = 0; x < width; x++) {
 						int pos = y * width + x;
-						int argb = origPixels[pos]; // Lesen der Originalwerte
+						
+						int r = 0;
+						int g = 0;
+						int b = 0;
 
-						int r = (argb >> 16) & 0xff;
-						int g = (argb >> 8) & 0xff;
-						int b = argb & 0xff;
-
-						int rn = 0;
-						int gn = 0;
-						int bn = 0;
-
-						for (int i=-1; i<2; i++) {
-							for (int j=-1; j<2; j++) {
-								if (i+y<0 || i+y>height) i=0;
-								if (j+x<0 || j+x>width) j=0;
+						for (int i=-1; i<=1; i++) {
+							for (int j=-1; j<=1; j++) {
+//								Alte Logik, out of bounds!
+//								if (i+y<0 || i+y>height) i=0;
+//								if (j+x<0 || j+x>width) j=0;
+								
+								if (i+y>=0 && i+y<height && j+x>=0 && j+x<width){
+								
 								int colors = origPixels[pos+i*width+j];
-								int rt = (colors >> 16) & 0xff;
-								int gt = (colors >> 8) & 0xff;
-								int bt = colors & 0xff;
-								rn += rt /9.0;
-								gn += gt /9.0;
-								bn += bt /9.0;
+								int rn = (colors >> 16) & 0xff;
+								int gn = (colors >> 8) & 0xff;
+								int bn = colors & 0xff;
+
+								r += rn /9.0;
+								g += gn /9.0;
+								b += bn /9.0;
+								}
 							}
 						}
 						
-
-						pixels[pos] = (0xFF << 24) | (rn << 16) | (gn << 8) | bn;
+						pixels[pos] = (0xFF << 24) | (r << 16) | (g << 8) | b;
 					}
 				}
 			}
