@@ -108,10 +108,9 @@ public class GRDM_U5_s0577683 implements PlugIn {
 		}
 
 		private void changePixelValues(ImageProcessor ip) {
-			//Rausgenommen wegen Redundanz
-			int r = 0;
-			int g = 0;
-			int b = 0;
+			
+			//Kernel-Größe angeben, quadrat! Eine Seite reicht
+			int k = 3;
 			
 			// Array zum Zurückschreiben der Pixelwerte
 			int[] pixels = (int[]) ip.getPixels();
@@ -133,12 +132,18 @@ public class GRDM_U5_s0577683 implements PlugIn {
 					for (int x = 0; x < width; x++) {
 						int pos = y * width + x;
 						
-						for (int i = -1; i <= 1; i++) {
-							for (int j = -1; j <= 1; j++) {
+						int r = 0;
+						int g = 0;
+						int b = 0;
+						
+						//Loop abhängig von Kernel-Größe
+						for (int i = -(k-1)/2; i <= (k-1)/2; i++) {
+							for (int j = -(k-1)/2; j <= (k-1)/2; j++) {
+								
 //								Alte Logik, out of bounds!
 //								if (i+y<0 || i+y>height) i=0;
 //								if (j+x<0 || j+x>width) j=0;
-
+								
 								if (i + y >= 0 && i + y < height && j + x >= 0 && j + x < width) {
 
 									int colors = origPixels[pos + i * width + j];
@@ -146,9 +151,10 @@ public class GRDM_U5_s0577683 implements PlugIn {
 									int gn = (colors >> 8) & 0xff;
 									int bn = colors & 0xff;
 
-									r += rn / 9;
-									g += gn / 9;
-									b += bn / 9;
+									//Divisor ist die Menge der Pixel im Kernel, quadratisch - hoch 2
+									r += rn / Math.pow(k, 2);
+									g += gn / Math.pow(k, 2);
+									b += bn / Math.pow(k, 2);
 								}
 							}
 						}
@@ -163,9 +169,13 @@ public class GRDM_U5_s0577683 implements PlugIn {
 				for (int y = 0; y < height; y++) {
 					for (int x = 0; x < width; x++) {
 						int pos = y * width + x;
+						
+						int r = 0;
+						int g = 0;
+						int b = 0;
 
-						for (int i = -1; i <= 1; i++) {
-							for (int j = -1; j <= 1; j++) {
+						for (int i = -(k-1)/2; i <= (k-1)/2; i++) {
+							for (int j = -(k-1)/2; j <= (k-1)/2; j++) {
 
 								if (i + y >= 0 && i + y < height && j + x >= 0 && j + x < width) {
 									int colors = origPixels[pos + i * width + j];
@@ -175,13 +185,13 @@ public class GRDM_U5_s0577683 implements PlugIn {
 									
 									//Mittelpixel wird anders behandelt
 									if (i == 0 && j == 0) {
-										r += rn * 8 / 9;
-										g += gn * 8 / 9;
-										b += bn * 8 / 9;
+										r += rn * (Math.pow(k, 2)-1) / Math.pow(k, 2);
+										g += gn * (Math.pow(k, 2)-1) / Math.pow(k, 2);
+										b += bn * (Math.pow(k, 2)-1) / Math.pow(k, 2);
 									} else {
-										r -= rn / 9;
-										g -= gn / 9;
-										b -= bn / 9;
+										r -= rn / Math.pow(k, 2);
+										g -= gn / Math.pow(k, 2);
+										b -= bn / Math.pow(k, 2);
 									}
 									
 									//Bild fast schwarz, offset dazu
@@ -202,17 +212,39 @@ public class GRDM_U5_s0577683 implements PlugIn {
 				for (int y = 0; y < height; y++) {
 					for (int x = 0; x < width; x++) {
 						int pos = y * width + x;
-						int argb = origPixels[pos]; // Lesen der Originalwerte
+						
+						int r = 0;
+						int g = 0;
+						int b = 0;
 
-						int r = (argb >> 16) & 0xff;
-						int g = (argb >> 8) & 0xff;
-						int b = argb & 0xff;
+						for (int i = -(k-1)/2; i <= (k-1)/2; i++) {
+							for (int j = -(k-1)/2; j <= (k-1)/2; j++) {
 
-						int rn = r / 2;
-						int gn = g / 2;
-						int bn = b / 2;
+								if (i + y >= 0 && i + y < height && j + x >= 0 && j + x < width) {
+									int colors = origPixels[pos + i * width + j];
+									int rn = (colors >> 16) & 0xff;
+									int gn = (colors >> 8) & 0xff;
+									int bn = colors & 0xff;
+									
+									//Mittelpixel wird anders behandelt
+									if (i == 0 && j == 0) {
+										r += rn + rn * (Math.pow(k, 2)-1) / Math.pow(k, 2);
+										g += gn + gn * (Math.pow(k, 2)-1) / Math.pow(k, 2);
+										b += bn + bn * (Math.pow(k, 2)-1) / Math.pow(k, 2);
+									} else {
+										r -= rn / Math.pow(k, 2);
+										g -= gn / Math.pow(k, 2);
+										b -= bn / Math.pow(k, 2);
+									}
+									//Farbüberlauf vorbeugen
+									r = Math.min(255, Math.max(0, r));
+									g = Math.min(255, Math.max(0, g));
+									b = Math.min(255, Math.max(0, b));
+								}
+							}
+						}
 
-						pixels[pos] = (0xFF << 24) | (rn << 16) | (gn << 8) | bn;
+						pixels[pos] = (0xFF << 24) | (r << 16) | (g << 8) | b;
 					}
 				}
 			}
