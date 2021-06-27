@@ -100,6 +100,9 @@ public class GRDM_U5_s0577683 implements PlugIn {
 			kernelInput = new JTextField(1);
 			panel.add(kernelInput);
 			
+			JLabel info = new JLabel("(<- wenn leer, ist die Kernelgröße 3x3)");
+			panel.add(info);
+			
 			add(panel);
 			pack();
 		}
@@ -121,7 +124,12 @@ public class GRDM_U5_s0577683 implements PlugIn {
 		private void changePixelValues(ImageProcessor ip) {
 			
 			//Kernel-Größe auslesen, hier immer quadratisch! Eine Seite reicht
-			int k = Integer.parseInt(kernelInput.getText());
+			int k = 0;
+			if (!kernelInput.getText().equals("")) {
+				k = Integer.parseInt(kernelInput.getText());
+			}
+			//Falls Kernel kleiner als 3 oder gerade, nächstgrößeren ungeraden Kernel nehmen.
+			while (k<3 || k%2==0) k++;
 			
 			// Array zum Zurückschreiben der Pixelwerte
 			int[] pixels = (int[]) ip.getPixels();
@@ -166,6 +174,8 @@ public class GRDM_U5_s0577683 implements PlugIn {
 									r += rn / Math.pow(k, 2);
 									g += gn / Math.pow(k, 2);
 									b += bn / Math.pow(k, 2);
+								} else {
+									r += 0;
 								}
 							}
 						}
