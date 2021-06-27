@@ -7,6 +7,7 @@ import ij.gui.ImageWindow;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -16,8 +17,10 @@ import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -31,6 +34,8 @@ public class GRDM_U5_s0577683 implements PlugIn {
 	private int[] origPixels;
 	private int width;
 	private int height;
+	
+	private JTextField kernelInput;
 
 	String[] items = { "Original", "Weichzeichnung", "Hochpassfilter", "Verstärkte Kanten" };
 
@@ -88,7 +93,13 @@ public class GRDM_U5_s0577683 implements PlugIn {
 			JComboBox cb = new JComboBox(items);
 			panel.add(cb);
 			cb.addItemListener(this);
+			
+			JLabel kernelLabel = new JLabel("Kernelsize");
+			panel.add(kernelLabel);
 
+			kernelInput = new JTextField(1);
+			panel.add(kernelInput);
+			
 			add(panel);
 			pack();
 		}
@@ -109,8 +120,8 @@ public class GRDM_U5_s0577683 implements PlugIn {
 
 		private void changePixelValues(ImageProcessor ip) {
 			
-			//Kernel-Größe angeben, quadrat! Eine Seite reicht
-			int k = 3;
+			//Kernel-Größe auslesen, hier immer quadratisch! Eine Seite reicht
+			int k = Integer.parseInt(kernelInput.getText());
 			
 			// Array zum Zurückschreiben der Pixelwerte
 			int[] pixels = (int[]) ip.getPixels();
